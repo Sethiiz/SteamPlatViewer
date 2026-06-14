@@ -1,0 +1,4 @@
+.env
+*.exe
+platinum_list.xlsx
+progress.json
