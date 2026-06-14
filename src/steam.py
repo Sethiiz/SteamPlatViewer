@@ -23,6 +23,15 @@ class SteamClient:
         self._s = session
         self._key = api_key
 
+    async def get_player_summary(self, steam_id: str) -> dict:
+        async with self._s.get(
+            f"{BASE}/ISteamUser/GetPlayerSummaries/v2/",
+            params={"key": self._key, "steamids": steam_id},
+        ) as r:
+            data = await r.json()
+        players = data.get("response", {}).get("players", [])
+        return players[0] if players else {}
+
     async def resolve_vanity(self, vanity: str) -> str:
         async with self._s.get(
             f"{BASE}/ISteamUser/ResolveVanityURL/v1/",
