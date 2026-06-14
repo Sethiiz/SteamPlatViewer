@@ -2,3 +2,7 @@
 *.exe
 platinum_list.xlsx
 progress.json
+__pycache__/
+*.pyc
+.idea/
+.venv/
