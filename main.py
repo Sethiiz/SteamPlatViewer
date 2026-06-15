@@ -21,21 +21,15 @@ HLTB_SEM   = 5
 
 def _resolve_steam_input(raw: str) -> str | None:
     raw = raw.strip()
-    # SteamID64 direto (17 dígitos numéricos)
     if re.fullmatch(r"\d{17}", raw):
         return raw
-    # URL tipo steamcommunity.com/profiles/76561198XXXXXXXXX
     m = re.search(r"/profiles/(\d{17})", raw)
     if m:
         return m.group(1)
-    # URL tipo steamcommunity.com/id/VANITY
     m = re.search(r"/id/([^/?\s]+)", raw)
     if m:
-        return m.group(1)  # retorna vanity; resolvemos depois
-    # Qualquer outra string não-vazia = vanity
-    if raw:
-        return raw
-    return None
+        return m.group(1)
+    return raw or None
 
 
 async def _ensure_steam_id(raw: str, client: SteamClient) -> str:
@@ -193,7 +187,6 @@ async def _main_loop() -> None:
         client = SteamClient(session, api_key)
         progress = Progress.load()
 
-        # Fluxo de primeiro uso
         if not progress.steam_id:
             env_profile = os.getenv("STEAM_PROFILE", "").strip()
             raw = env_profile or input("Digite o perfil Steam (URL ou SteamID64): ").strip()
