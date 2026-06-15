@@ -9,6 +9,7 @@ BASE = "https://api.steampowered.com"
 STATUS_NEVER      = "Nunca jogado"
 STATUS_INCOMPLETE = "Incompleto"
 STATUS_PLATINADO  = "Platinado"
+STATUS_PRIVATE    = "Privado"
 
 
 @dataclass
@@ -91,6 +92,8 @@ class SteamClient:
             ) as r:
                 data = (await r.json()).get("playerstats", {})
             if not data.get("success"):
+                if "not public" in data.get("error", "").lower():
+                    return STATUS_PRIVATE
                 return STATUS_INCOMPLETE
             achievements = data.get("achievements", [])
             if not achievements:
