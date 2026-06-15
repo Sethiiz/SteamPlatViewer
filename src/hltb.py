@@ -38,8 +38,13 @@ async def _search_once(name: str) -> HLTBResult | None:
         return None
     exact = next((r for r in results if r.game_name.lower() == name.lower()), None)
     best = exact or max(results, key=lambda r: r.similarity)
-    if not exact and best.similarity < 0.5:
-        return None
+    if not exact:
+        if best.similarity < 0.5:
+            return None
+        name_l = name.lower()
+        best_l = best.game_name.lower()
+        if best_l.startswith(name_l) and best_l != name_l:
+            return None
     hours = best.completionist
     if not hours or hours <= 0:
         hours = best.all_styles
@@ -62,6 +67,12 @@ async def search(name: str) -> HLTBResult | None:
     if full and full != light and full != name:
         await asyncio.sleep(RATE_DELAY)
         if result := await _search_once(full):
+            return result
+
+    title = name.title()
+    if title != name and title != light and title != full:
+        await asyncio.sleep(RATE_DELAY)
+        if result := await _search_once(title):
             return result
 
     return None
