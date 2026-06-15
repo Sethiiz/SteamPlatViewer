@@ -70,7 +70,7 @@ async def run_processing(
         ach_count, hltb = await asyncio.gather(fetch_ach(), fetch_hltb())
 
         async with steam_sem:
-            status = await client.get_player_status(
+            status, _ = await client.get_player_status(
                 steam_id, game.appid, game.playtime_forever, ach_count
             )
 
@@ -134,7 +134,7 @@ async def run_retry(
                         steam_id, entry.appid, 1, entry.achievements
                     )
 
-            hltb, status = await asyncio.gather(fetch_hltb_retry(), fetch_status_retry())
+            hltb, (status, _) = await asyncio.gather(fetch_hltb_retry(), fetch_status_retry())
 
             if hltb is None:
                 print(f"[{idx}/{total}] {entry.name} — {entry.achievements} conquistas — ainda sem HLTB")

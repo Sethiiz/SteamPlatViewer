@@ -80,11 +80,11 @@ class SteamClient:
 
     async def get_player_status(
         self, steam_id: str, appid: int, playtime: int, achievement_count: int
-    ) -> str:
+    ) -> tuple[str, int]:
         if playtime == 0:
-            return STATUS_NEVER
+            return STATUS_NEVER, 0
         if achievement_count == 0:
-            return STATUS_INCOMPLETE
+            return STATUS_INCOMPLETE, 0
         try:
             async with self._s.get(
                 f"{BASE}/ISteamUserStats/GetPlayerAchievements/v1/",
@@ -93,13 +93,14 @@ class SteamClient:
                 data = (await r.json()).get("playerstats", {})
             if not data.get("success"):
                 if "not public" in data.get("error", "").lower():
-                    return STATUS_PRIVATE
-                return STATUS_INCOMPLETE
+                    return STATUS_PRIVATE, -1
+                return STATUS_INCOMPLETE, -1
             achievements = data.get("achievements", [])
             if not achievements:
-                return STATUS_INCOMPLETE
-            if all(a["achieved"] == 1 for a in achievements):
-                return STATUS_PLATINADO
-            return STATUS_INCOMPLETE
+                return STATUS_INCOMPLETE, 0
+            unlocked = sum(1 for a in achievements if a["achieved"] == 1)
+            if unlocked == len(achievements):
+                return STATUS_PLATINADO, unlocked
+            return STATUS_INCOMPLETE, unlocked
         except Exception:
-            return STATUS_INCOMPLETE
+            return STATUS_INCOMPLETE, -1
