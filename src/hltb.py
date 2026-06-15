@@ -36,8 +36,9 @@ async def _search_once(name: str) -> HLTBResult | None:
         return None
     if not results:
         return None
-    best = max(results, key=lambda r: r.similarity)
-    if best.similarity < 0.5:
+    exact = next((r for r in results if r.game_name.lower() == name.lower()), None)
+    best = exact or max(results, key=lambda r: r.similarity)
+    if not exact and best.similarity < 0.5:
         return None
     hours = best.completionist
     if not hours or hours <= 0:
